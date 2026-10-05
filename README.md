@@ -38,6 +38,13 @@ OpenAI-compatible endpoint.
 
 Around the editor it keeps what long fiction actually needs:
 
+- **Consistency interlock** (the core idea) — a *world-state ledger* tracks the protagonist's
+  assets, power, level, location, inventory and relationships, plus **persistent state** such as
+  injuries, stamina and gear wear — an unhealed wound must keep showing up in every chapter.
+  The ledger is injected **in full** on every generation, rewritten **automatically** after each
+  chapter, and checked by **two independent conflict detectors**: one semantic (the model
+  cross-checks numbers in the prose against the ledger) and one **purely mechanical** (a number
+  exceeding the ledger by 5× with no stated cause is flagged, whatever the model claims).
 - **Outline & setting memory** — characters, world, entities, relationships, foreshadowing,
   timeline; injected into the model's context automatically
 - **Rule engine** — enforces word-count limits and banned / tired-word lists
@@ -51,6 +58,44 @@ Built with Electron, React 19 and TypeScript. Windows. MIT licensed. v0.1.0 — 
 > **Bring your own key.** The app ships with no credentials and uploads nothing.
 > Media playback talks to unofficial APIs of third-party services; it is included for personal,
 > educational use only. Rights to all media belong to their respective owners.
+
+---
+
+## 亮点
+
+### 🔒 一致性互锁 —— 本项目的核心
+
+AI 写长篇最大的痛点是"写着写着就前后矛盾"。落笔不靠模型自觉：它把
+**设定 / 大纲 / 正文 / 台账**四者互相锁死，而且**有机械检测兜底**。
+
+**世界状态台账**（`创作资料/重点记忆/小说规划/世界状态台账.md`）记录并强制维护：
+
+- 主角状态：资产、实力、等级、所在地点、持有物品、人际关系
+- **持续状态**：伤病（哪一章受的伤、部位、严重程度、是否愈合）、体力、装备损耗
+  —— 未痊愈的伤**必须每章持续体现**，不得凭空消失；恢复必须写明过程
+- 势力格局、关键时间线（第几章发生了什么）
+
+**锁在哪些环节：**
+
+| 环节 | 机制 |
+|---|---|
+| **写前** | 台账**完整注入**每次创作上下文（刻意不截断尾部时间线），并硬性约束"数值以台账为准，不得随意更改" |
+| **写后** | 章节保存后自动分析回写：前文概要 / 台账 / 设定沉淀 / 大纲 / 细纲 / 时间线 |
+| **硬性输出** | `state_update` 必须输出；`canon_updates` **禁止空数组**（至少要有时间线更新） |
+| **双重冲突检测** | ① AI 逐条核对正文数值与台账；② **纯机械检测**：正文数值超台账 5 倍且无来源交代 → 直接报冲突 |
+| **提交校验网关** | 落盘前再核对一遍前文资料，检出矛盾 / 脱节 / 元叙述 |
+| **优先级** | 章节细纲 > 分卷大纲 > 总纲；**数值以世界状态台账为准** |
+| **设定强制落盘** | 聊天里修正设定时，AI 必须**立即写文件**，不许只回"记住了" |
+| **缺口补齐** | 一键遍历已写章节，补齐缺失的时间线 / 细纲 / 大纲标记 |
+
+### 其余优点
+
+- **本地优先、纯文本**：书稿就是磁盘上的 `正文/第001章.txt` + Markdown 资料，不进数据库、
+  不上传服务器，可随时用任何编辑器打开，也可以直接 Git 管理
+- **不锁定数据**：目录布局稳定，并兼容旧版目录（自动识别迁移），换工具不丢稿
+- **自带写作规则**：字数上下限、禁用词、疲劳词、AI 套句检测，落盘前自检并留报告
+- **成本可见**：token 与费用按项目累计
+- **自备 Key**：不内置任何 API Key，接你自己的 OpenAI 兼容接口
 
 ---
 
