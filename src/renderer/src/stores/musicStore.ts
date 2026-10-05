@@ -12,7 +12,7 @@ export interface MusicTrack {
   url?: string
 }
 
-/** 发现页榜单卡片（网易云 toplist/detail） */
+/** 发现页榜单卡片 */
 export interface DiscoverCard {
   id: string
   title: string
@@ -97,7 +97,7 @@ interface MusicState {
   toggleFullLyric: () => void
 }
 
-/** CSP media-src 仅放行了网易 CDN（http(s)://*.music.126.net）；其余源一律走 music:// 代理（主进程转发+防盗链头） */
+/** 封面能直连的走 CDN，其余走 music:// 代理（主进程转发 + 防盗链头） */
 function directPlayableUrl(u: string): boolean {
   return /^https?:\/\/([\w-]+\.)*music\.126\.net\//i.test(u)
 }
@@ -264,7 +264,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     if (track) await get().toggleFavorite(track)
   },
 
-  /** 发现页：拉取网易云榜单卡片（20 小时内缓存有效；force 强制重拉用于每日刷新） */
+  /** 发现页：拉取榜单卡片（20 小时内缓存有效；force 强制重拉用于每日刷新） */
   loadDiscover: async (force) => {
     const { discoverCards, discoverLoading, discoverLoadedAt } = get()
     if (!force && discoverLoading) return
@@ -322,7 +322,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
       // 先换源取播放地址（含主进程自动换源），经自定义协议 music:// 流式代理播放
       // （直连 http 会被 CSP media-src 'self' 拦截，主进程代理同时支持 Range seek）
       const sound: any = await window.luobi.music.getTrackUrl(track)
-      // 网易 CDN 直连（CSP 已放行）；酷狗/酷我/太合等音源直接走 music:// 代理（带防盗链 Referer + Range）
+      // 部分源封面可直连；音频统一走 music:// 代理（带防盗链 Referer + Range）
       set({ currentUrl: sound.url, currentBitrate: sound.bitrate ? String(sound.bitrate).replace(/kbps$/i, 'K') : '' })
       audioEl.src = directPlayableUrl(sound.url) ? sound.url : `music://play?u=${encodeURIComponent(sound.url)}`
       audioEl.currentTime = 0
@@ -335,7 +335,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     }
   },
 
-  /** 网易直连失败后切换 music:// 主进程代理通道重试（仅一次） */
+  /** 直连失败后切换 music:// 主进程代理通道重试（仅一次） */
   retryWithProxy: () => {
     const { audioEl, currentUrl } = get()
     if (!audioEl || !currentUrl) return
@@ -409,7 +409,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     const track = get().tracks[index]
     if (!track) return
     try {
-      // 主进程内做跨源歌词兜底（当前源空 → 网易同名取词）
+      // 主进程内做跨源歌词兜底（当前源为空 → 按同名取词）
       const r: any = await window.luobi.music.lyric(track)
       set({ lyric: r?.lyric ?? '' })
     } catch {

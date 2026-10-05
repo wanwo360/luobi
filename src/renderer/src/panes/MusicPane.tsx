@@ -374,7 +374,7 @@ export function MusicPane(): React.JSX.Element {
             )}
             {discoverCards.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', fontSize: 10, color: 'var(--nf-muted)', padding: '0 4px 6px' }}>
-                <span style={{ flex: 1 }}>网易云榜单（每日自动更新）</span>
+                <span style={{ flex: 1 }}>榜单（每日自动更新）</span>
                 <span title="榜单卡片每日跨天自动重拉；点击榜单时曲目实时取最新">
                   🕘 更新于 {fmtUpdateTime(discoverLoadedAt)}
                 </span>

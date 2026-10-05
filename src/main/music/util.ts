@@ -63,7 +63,7 @@ function cookieHeaderFor(url: string): string {
 
 // ============ HTTP（fetch 封装，默认带 cookie；referer 用于防盗链接口） ============
 
-/** 同 host 请求最小间隔（网易/QQ 对密集请求有明显频控，短时间连发会命中 -460/2001） */
+/** 同 host 请求最小间隔（各源对密集请求有明显频控，短时间连发会被限流） */
 const lastReqAt = new Map<string, number>()
 const MIN_INTERVAL_MS = 350
 

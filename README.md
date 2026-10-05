@@ -202,7 +202,7 @@ npm run typecheck    # 类型检查
 ```
 shared/        三进程共享类型、IPC 通道、数据布局常量（兼容性单一事实源）
 src/main/      主进程（工作区/项目/章节/资料/聊天/AI 引擎/规则/用量/智能体）
-src/main/music/ 音乐源（网易云/QQ 等，移植自 Listen1（MIT），零 electron 依赖可独立联调）
+src/main/music/ 音乐源调度壳（调度层移植自 Listen 1，MIT；第三方实现不在本仓库，见 providers/README.md）
 src/preload/   window.luobi.* 桥接（渲染层桥接）
 src/renderer/  React UI（7 面板布局、聊天、章节编辑器、设置中心）
 e2e/           兼容性冒烟（npm run smoke）

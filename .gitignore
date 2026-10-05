@@ -39,3 +39,7 @@ e2e/diagnostics/*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Windows 快捷方式（含绝对路径，机器专属，绝不入库）
+*.lnk
+*.url

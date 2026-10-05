@@ -114,7 +114,7 @@ function bitrateOf(s: SoundItem): number {
   return m ? Number(m[1]) : 0
 }
 
-/** 歌手名归一化：各平台尾部标差异（网易"周杰伦-"、尾标/下划线等）→ 匹配用 */
+/** 歌手名归一化：各平台尾部标差异（尾标/下划线等）→ 匹配用 */
 function normArtist(a: string): string {
   return String(a ?? '')
     .trim()
@@ -154,7 +154,7 @@ async function searchSameTrack(name: MusicSource, track: TrackItem): Promise<Tra
 }
 
 /**
- * 音质升级：当前源只给低码率（<200k，试听流 128k）时，尝试网易同曲 320k 版
+ * 音质升级：当前源只给低码率（<200k，试听流 128k）时，尝试取同曲更高码率版本
  */
 async function tryUpgradeToNetease(track: TrackItem): Promise<SoundItem | null> {
   const ne = getProviderByName('netease')
@@ -170,8 +170,8 @@ async function tryUpgradeToNetease(track: TrackItem): Promise<SoundItem | null> 
 }
 
 /**
- * 换源：按优先级（网易→酷狗→酷我→太合）逐源搜索同曲并取播放地址
- * 背景：酷我 anti.svc 返回 177KB≈10s 试听片段（无全曲通道，convert_url3 片段型）——
+ * 换源：按注册顺序逐源搜索同曲并取播放地址
+ * 背景：部分源只返回 10s 级试听片段（无全曲通道）——
  *       片段源播放即「沙哑断续」体验，必须换源到全曲
  */
 async function tryFallbackSources(track: TrackItem): Promise<SoundItem | null> {
@@ -190,8 +190,8 @@ async function tryFallbackSources(track: TrackItem): Promise<SoundItem | null> {
 }
 
 /**
- * 取播放地址：当前源优先；低码率（128k 试听流）先尝试升级网易 320k；
- * 酷我（10s 试听片段源）升级失败 → 逐源换全曲，绝不让碎片进耳朵；
+ * 取播放地址：当前源优先；低码率（128k 试听流）先尝试升级到更高码率；
+ * 试听片段源升级失败 → 逐源换全曲，绝不让碎片进耳朵；
  * 全部失败才抛错（renderer 静默处理）
  */
 export async function getTrackUrl(track: TrackItem): Promise<SoundItem> {
@@ -223,8 +223,8 @@ export async function getTrackUrl(track: TrackItem): Promise<SoundItem> {
 }
 
 /**
- * 歌词：当前源优先；为空/失败时跨源兜底（网易同名搜索取歌词）
- * 背景：kuwo 歌词接口已 301 关闭、kugou/taihe 歌词不稳 → 网易 weapi lyric 最可靠
+ * 歌词：当前源优先；为空/失败时跨源兜底（按同名搜索取歌词）
+ * 背景：各源歌词接口稳定性不一 → 优先取最可靠的一路
  */
 export async function getLyric(track: TrackItem): Promise<LyricResult> {
   if (track?.id) {
