@@ -51,6 +51,14 @@ Around the editor it keeps what long fiction actually needs:
   chapter / revision log), chapter abstracts and key memory. Debounced, re-run on the next
   launch if you quit mid-debounce, retried once on parse failure, and degraded to at least
   timeline + outline markers if the model output still can't be parsed.
+- **Token discipline** — context is budgeted per section instead of dumped in whole: the state
+  ledger gets 9000 chars (the one part that must not be truncated), rules 5000, master outline
+  3500, summaries and the next-chapter outline 3000 each, and recent chapters only their **last
+  2500 chars**; background canon/memory pre-reading takes only the **first 120–200 chars per
+  file**. Chat history is truncated per message, retry loops are capped, and one JSON call
+  updates summary + ledger + canon + memory + outline at once instead of several. A built-in
+  price table (DeepSeek, GPT, Claude, Gemini, Chinese providers) bills cached input at its
+  discounted rate.
 - **Outline & setting memory** — characters, world, entities, relationships, foreshadowing,
   timeline; injected into the model's context automatically
 - **Rule engine** — enforces word-count limits and banned / tired-word lists
@@ -110,6 +118,36 @@ AI 写长篇最大的痛点是"写着写着就前后矛盾"。落笔不靠模型
 | **缺口补齐** | 一键遍历全部已写章节，把缺失的时间线 / 细纲 / 大纲标记补齐 |
 
 > 也就是：你只管写正文，资料是**自动长出来的**，而且每一条失败路径都有兜底。
+
+### 💰 省 token 的设计（不是"接上模型就完事"）
+
+**分档截断** —— 按用途分配预算，而不是把资料全量塞进上下文：
+
+| 内容 | 注入上限 |
+|---|---|
+| 世界状态台账 | 9000 字（唯一要求完整注入、不许截断时间线的一段） |
+| 写作规则 | 5000 字 |
+| 声明式附件 | 每份 4000 字 |
+| 总纲 | 3500 字（只取核心前段） |
+| 前文剧情概要 / 下一章细纲 | 各 3000 字 |
+| 最近章节正文 | 只取**章节尾部 2500 字**（足够接上文风与剧情） |
+| 分卷大纲 | 每卷 2000 字 |
+| 大纲修订记录 | 每份 800 字 |
+| 章节摘要 | 每章 400 字 |
+| 其余章节细纲 | 每份 150 字摘要 |
+| 设定 / 记忆后台预读 | **每文件前 120–200 字**，最多 30 个文件 |
+
+**可调开关**：注入最近几章（0 = 不注入）、是否注入总纲 / 剧情概要、上下文总字符上限。
+
+**防浪费：**
+
+- 多轮对话历史每条截断 500 字；单会话消息数上限约 150 轮
+- 工具调用"口胡"最多纠正 3 次，防死循环烧 token
+- **章节整理一次调用输出一份 JSON**，同时更新 摘要 / 概要 / 台账 / 设定 / 记忆 / 大纲 —— 而不是分多次调用
+- 保存防抖：连续保存只整理最后一次
+- 工具**按需注入**：用户提到"设定 / 时间线 / 伏笔"等词，才挂上对应工具
+
+**成本看得见**：内置数十个模型的价格表（DeepSeek / GPT / Claude / Gemini / 国产），**区分缓存读入价**（通常只有输入价的 1/4），token 与费用按项目累计。写作分身还能单独指定一个更便宜的模型。
 
 ### 其余优点
 
