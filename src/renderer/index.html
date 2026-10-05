@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <title>落笔 - 万象文新</title>
+    <!--
+      CSP 说明：
+      音乐源由使用者自行接入（见 src/main/music/providers/README.md），其封面 CDN 无法在构建期枚举，
+      因此 img-src 不再逐个列出具体域名。
+      音频流经主进程 music:// 代理转发（见 src/main/music/stream.ts），renderer 不直连 CDN，
+      所以 media-src 保持收紧。script-src / default-src 维持 'self'。
+      如需更严格的策略：接入音乐源后，把 img-src 收敛成你自己源用到的封面域名即可。
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; media-src 'self' music:; script-src 'self'"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

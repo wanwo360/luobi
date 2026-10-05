@@ -1,0 +1,41 @@
+# 依赖
+node_modules/
+
+# 构建产物
+out/
+dist/
+*.tsbuildinfo
+
+# 日志
+*.log
+npm-debug.log*
+
+# 环境变量 / 密钥
+.env
+.env.*
+*.key
+
+# 本地用户配置（防御：绝不入库）
+**/.luobi-open/
+**/.xinglu-open/
+**/provider-config.json
+**/image-config.json
+**/*.secret.json
+
+# 本地私有音乐源实现（第三方接口代码不随仓库发布）
+# 说明见 src/main/music/providers/README.md
+src/main/music/providers/impl/
+
+# 本地一次性诊断脚本（多数会改动真实书目数据 / 含真实书目 ID 或第三方接口端点，不公开）
+# 只放行经核实「只读、无个人信息、无第三方端点」的脚本
+e2e/diagnostics/*
+!e2e/diagnostics/check-encoding.cjs
+!e2e/diagnostics/web-search-probe.mjs
+!e2e/diagnostics/music-test.mjs
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
