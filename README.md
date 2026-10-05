@@ -45,6 +45,12 @@ Around the editor it keeps what long fiction actually needs:
   chapter, and checked by **two independent conflict detectors**: one semantic (the model
   cross-checks numbers in the prose against the ledger) and one **purely mechanical** (a number
   exceeding the ledger by 5× with no stated cause is flagged, whatever the model claims).
+- **Auto-maintenance after every chapter** — save a chapter and, five seconds later, the app
+  re-reads it and rewrites the story summary, the state ledger, the canon files (characters,
+  world, entities, relationships, foreshadowing, timeline), the outline (master / volume /
+  chapter / revision log), chapter abstracts and key memory. Debounced, re-run on the next
+  launch if you quit mid-debounce, retried once on parse failure, and degraded to at least
+  timeline + outline markers if the model output still can't be parsed.
 - **Outline & setting memory** — characters, world, entities, relationships, foreshadowing,
   timeline; injected into the model's context automatically
 - **Rule engine** — enforces word-count limits and banned / tired-word lists
@@ -87,6 +93,23 @@ AI 写长篇最大的痛点是"写着写着就前后矛盾"。落笔不靠模型
 | **优先级** | 章节细纲 > 分卷大纲 > 总纲；**数值以世界状态台账为准** |
 | **设定强制落盘** | 聊天里修正设定时，AI 必须**立即写文件**，不许只回"记住了" |
 | **缺口补齐** | 一键遍历已写章节，补齐缺失的时间线 / 细纲 / 大纲标记 |
+
+### 🔄 保存一章，资料自动长出来（不用手动维护）
+
+章节存盘 5 秒后，自动读最新章节并回写：**前文剧情概要 / 世界状态台账 / 设定沉淀（人物·世界·实体·关系·伏笔·时间线）/ 大纲（总纲·分卷大纲·章节细纲·大纲修订记录）/ 章节摘要 / 重点记忆**。
+
+工程上的兜底（这才是关键）：
+
+| 机制 | 说明 |
+|---|---|
+| **防抖** | 连续保存只整理最后一次，不浪费模型调用 |
+| **退出补跑** | 防抖期内退出应用，下次启动自动补跑，**整理不会丢** |
+| **失败重试** | AI 输出解析失败 → 自动重试一次完整整理 |
+| **优雅降级** | 重试仍失败 → 至少补齐大纲标记与时间线，保证不缺章 |
+| **台账兜底** | AI 漏输出台账时，自动把本章摘要追加进时间线，台账永远不缺章 |
+| **缺口补齐** | 一键遍历全部已写章节，把缺失的时间线 / 细纲 / 大纲标记补齐 |
+
+> 也就是：你只管写正文，资料是**自动长出来的**，而且每一条失败路径都有兜底。
 
 ### 其余优点
 
